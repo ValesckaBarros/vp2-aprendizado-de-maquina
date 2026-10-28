@@ -1,0 +1,3 @@
+modelo,RMSE,MAE,NASA Score (artigo),NASA Score (constantes do enunciado),RMSE (RUL real clip 130)
+Baseline LSTM 2×64 (W=30),15.034,11.116,411.016,368.068,14.277
+Optuna: GRU 2×96 (W=50),14.54,10.825,379.212,355.96,13.988
