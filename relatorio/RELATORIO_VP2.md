@@ -23,6 +23,7 @@ Todo o código está em Python, com Keras/TensorFlow 2.21 nas redes neurais, sci
 | Casting (binário) | CNN | F1 macro = 0,996. Apenas 2 de 453 peças defeituosas aprovadas. |
 | NEU (6 classes) | CNN | F1 macro = 0,993. O melhor clássico (SVM) teve 0,921. |
 | C-MAPSS FD001 (RUL) | GRU 2×96, janela de 50 ciclos | RMSE = 14,5 ciclos, MAE = 10,8, NASA Score = 379 |
+
 ## 2. Fundamentos: os algoritmos e como cada modelo foi construído
 
 Esta seção é comum às duas partes do trabalho. Para cada algoritmo explico a ideia, os hiperparâmetros que importam e o código usado para montar o modelo. Os modelos clássicos vêm do **scikit-learn**, as redes neurais do **Keras/TensorFlow** e a busca de hiperparâmetros do **Optuna**.
@@ -235,6 +236,7 @@ Para uma comparação justa, nos modelos clássicos **as duas buscas usam exatam
 - **Matriz de confusão**: linhas = classe real, colunas = classe prevista (heatmap).
 - **Tempo de treino**: tempo do `fit` final com os melhores hiperparâmetros.
 - **RUL (regressão)**: RMSE = √média(d²), MAE = média|d| e **NASA Score** = Σ exp(−d/13) − 1 (se d < 0) ou Σ exp(d/10) − 1 (se d ≥ 0), com d = RUL previsto − RUL real. O score é **assimétrico**: prever que o motor dura mais do que realmente dura (d > 0, previsão atrasada) é punido mais fortemente, porque leva à falha em operação.
+
 ## 3. Parte 1: CNN × modelos clássicos na inspeção visual de defeitos
 
 ### 3.1 Protocolo comum aos dois datasets
@@ -460,6 +462,7 @@ As curvas mostram a instabilidade inicial da validação (épocas 0 a 8), típic
 ### 3.5 Lição prática: BatchNormalization e early stopping
 
 Na primeira execução, a CNN do NEU teve F1 de apenas 0,13. A causa: com 1.260 imagens e lotes de 64, há só 20 atualizações por época. As médias móveis da `BatchNormalization` (momentum padrão de 0,99) levam centenas de passos para convergir, e por isso a rede funciona bem em modo treino mas mal em modo inferência nas primeiras épocas. A `val_loss` fica errática, e o `EarlyStopping` restaurava os pesos de uma das primeiras épocas. A correção teve duas partes: `BatchNormalization(momentum=0.9)`, para que as médias convirjam em poucas épocas, e `EarlyStopping(start_from_epoch=5)`, para ignorar o transiente inicial. Com isso, o F1 passou de 0,13 para 0,99.
+
 ## 4. Parte 2: prognóstico de RUL com RNN (C-MAPSS FD001)
 
 ### 4.1 O problema
@@ -585,6 +588,7 @@ As métricas são calculadas contra o RUL verdadeiro **sem clipping**, a avalia�
 3. **Acima de 125 ciclos, o modelo sempre subestima** (erro médio −18). É o efeito esperado do clipping em 130. Esse erro é conservador e barato no NASA Score.
 4. **Séries curtas são as mais difíceis.** O maior erro (motor 67: real 77, previsto 125) vem de um motor com apenas 71 ciclos observados: a janela ainda está na fase "saudável".
 5. Os erros são aproximadamente simétricos (52% das previsões atrasadas). Em uso real, seria possível deslocar as previsões alguns ciclos para baixo, trocando um pouco de RMSE por mais segurança.
+
 ## 5. Conclusões
 
 - **CNN × clássicos.** A CNN foi a melhor nos dois datasets de imagem. A vantagem é pequena quando um descritor manual (HOG) já captura o que diferencia as classes (Casting: 0,996 contra 0,991 do SVM) e grande quando a diferença está em texturas sutis (NEU: 0,993 contra 0,921). Entre os clássicos, o SVM com *kernel* RBF foi consistentemente o melhor, e a Árvore de Decisão e o Naive Bayes os piores.

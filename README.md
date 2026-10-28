@@ -17,7 +17,7 @@ Repositório com todos os entregáveis da VP2: classificação de defeitos com C
 - `notebooks/*.py`: os mesmos notebooks em formato .py (jupytext).
 - `modelos/`: `cnn_casting.keras`, `cnn_neu.keras`, `rnn_rul_fd001_best.keras` (melhor modelo RUL) e `rnn_baseline.keras`. Para carregar: `keras.models.load_model(caminho)`.
 - `resultados/`: tabelas em CSV (métricas, comparação GridSearch × Optuna, trials do Optuna).
-- `relatorio/`: relatório completo (`.md`, `.html` com as figuras embutidas, `.docx`) e a pasta `figuras/`.
+- `relatorio/`: relatório completo (`.pdf`, `.md`, `.html` com as figuras embutidas, `.docx`) e a pasta `figuras/`.
 
 ## Como rodar de novo (por exemplo, no Google Colab)
 
